@@ -122,24 +122,15 @@ export default function ForensicDashboard() {
               <h2 className="text-[10px] font-black mb-3 text-slate-500 uppercase tracking-[0.2em] shrink-0">
                 Upload Image
               </h2>
+
               {selectedImage ? (
                 <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden border border-slate-800">
-                  <img src={selectedImage} alt="preview" className="w-full h-full object-contain" />
-                  <button
-                    onClick={clearImage}
-                    className="absolute top-2 right-2 w-7 h-7 bg-black/70 rounded-full flex items-center justify-center text-slate-400 hover:text-white border border-slate-700/50 text-sm"
-                  >
-                    ✕
-                  </button>
+                  <img src={selectedImage} className="w-full h-full object-contain" />
                 </div>
               ) : (
-                <label
-                  htmlFor="image-upload"
-                  className="group border-2 border-dashed border-slate-800 rounded-2xl flex-1 flex flex-col items-center justify-center text-center hover:border-blue-500/40 hover:bg-blue-500/[0.02] transition-all cursor-pointer px-6 py-8"
-                >
-                  <input id="image-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                  <div className="text-4xl mb-3 opacity-20 group-hover:opacity-100 transition">🖼️</div>
-                  <p className="text-sm text-slate-400 italic">Upload image for analysis</p>
+                <label className="border-2 border-dashed border-slate-800 rounded-2xl flex-1 flex items-center justify-center cursor-pointer">
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  <span className="text-slate-500 text-sm">Upload Image</span>
                 </label>
               )}
             </div>
@@ -148,60 +139,29 @@ export default function ForensicDashboard() {
           {/* Webcam */}
           {activeTab === "webcam" && (
             <div className="bg-[#111827] border border-slate-800/50 rounded-2xl p-4 flex-1 flex flex-col min-h-0">
-              <h2 className="text-[10px] font-black mb-3 text-slate-500 uppercase tracking-[0.2em] shrink-0">
+              <h2 className="text-[10px] font-black mb-3 text-slate-500 uppercase tracking-[0.2em]">
                 Live Camera
               </h2>
-              <div className="relative flex-1 min-h-0 rounded-xl overflow-hidden border border-slate-800 bg-black flex items-center justify-center">
-                {!isCameraOn && !selectedImage && (
-                  <p className="text-slate-600 italic text-sm">Camera is off</p>
-                )}
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  className={`w-full h-full object-cover ${isCameraOn ? "block" : "hidden"}`}
-                />
-                {selectedImage && !isCameraOn && (
-                  <>
-                    <img src={selectedImage} alt="captured" className="w-full h-full object-contain" />
-                    <button
-                      onClick={clearImage}
-                      className="absolute top-2 right-2 w-7 h-7 bg-black/70 rounded-full flex items-center justify-center text-slate-400 hover:text-white border border-slate-700/50 text-sm"
-                    >
-                      ✕
-                    </button>
-                  </>
-                )}
-                {isCameraOn && (
-                  <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/60 px-2 py-1 rounded-full">
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                    <span className="text-[9px] text-red-400 uppercase tracking-widest font-black">LIVE</span>
-                  </div>
-                )}
-              </div>
-              <div className="flex gap-2 mt-3 shrink-0">
-                {!isCameraOn && !selectedImage && (
-                  <button onClick={startCamera} className="flex-1 bg-blue-600 hover:bg-blue-700 transition rounded-xl py-2.5 text-[10px] font-black uppercase tracking-[0.2em]">
-                    Open Camera
+
+              <video ref={videoRef} autoPlay className={`w-full h-full object-cover rounded-xl ${isCameraOn ? "block" : "hidden"}`} />
+
+              <div className="flex gap-2 mt-3">
+                {!isCameraOn ? (
+                  <button onClick={startCamera} className="flex-1 bg-blue-600 rounded-xl py-2 text-xs font-bold">
+                    Open
                   </button>
-                )}
-                {isCameraOn && (
+                ) : (
                   <>
-                    <button onClick={capturePhoto} className="flex-1 bg-emerald-600 hover:bg-emerald-700 transition rounded-xl py-2.5 text-[10px] font-black uppercase tracking-[0.2em]">
+                    <button onClick={capturePhoto} className="flex-1 bg-emerald-600 rounded-xl py-2 text-xs font-bold">
                       Capture
                     </button>
-                    <button onClick={stopCamera} className="px-4 bg-slate-700 hover:bg-slate-600 transition rounded-xl py-2.5 text-[10px] font-black uppercase tracking-[0.15em]">
+                    <button onClick={stopCamera} className="flex-1 bg-red-600 rounded-xl py-2 text-xs font-bold">
                       Stop
                     </button>
                   </>
                 )}
-                {selectedImage && !isCameraOn && (
-                  <button onClick={startCamera} className="flex-1 bg-slate-700 hover:bg-slate-600 transition rounded-xl py-2.5 text-[10px] font-black uppercase tracking-[0.15em]">
-                    Retake
-                  </button>
-                )}
               </div>
+
               <canvas ref={canvasRef} className="hidden" />
             </div>
           )}
@@ -210,49 +170,46 @@ export default function ForensicDashboard() {
         {/* RIGHT PANEL */}
         <section className="lg:col-span-8 flex flex-col min-h-0">
           <div className="bg-[#111827] rounded-[1.5rem] p-4 md:p-6 border border-slate-800/50 shadow-2xl flex-1 flex flex-col min-h-0">
-            <h2 className="text-lg md:text-xl font-bold text-white mb-4 shrink-0">
+
+            <h2 className="text-lg md:text-xl font-bold text-white">
               Security Analysis Report
             </h2>
+
+            {/* 🔵 MOVING LINE (geri eklendi) */}
+            <div className="h-[2px] w-full bg-blue-500/40 animate-bounce mt-2 mb-4 rounded-full"></div>
 
             {/* Image Preview */}
             <div className="flex-1 bg-[#070B14] rounded-2xl border border-slate-800 overflow-hidden flex items-center justify-center mb-4 min-h-0">
               {selectedImage ? (
-                <img src={selectedImage} alt="preview" className="w-full h-full object-contain" />
+                <img src={selectedImage} className="w-full h-full object-contain" />
               ) : (
-                <p className="text-slate-600 italic text-sm">No image selected</p>
+                <p className="text-slate-600 text-sm">No image selected</p>
               )}
             </div>
 
-            {/* Result + Analyze button */}
-            <div className="bg-[#070B14] border border-slate-800 rounded-2xl p-4 md:p-5 flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0">
+            {/* Result */}
+            <div className="bg-[#070B14] border border-slate-800 rounded-2xl p-4 flex justify-between items-center">
               <div>
-                <div className="text-[10px] text-blue-500 uppercase font-black tracking-[0.3em] mb-1">
-                  Security Verdict
-                </div>
-                <div className="text-lg md:text-xl font-bold text-slate-300 uppercase tracking-[0.1em] font-mono italic">
-                  {verdict}
+                <div className="text-[10px] text-blue-500 uppercase">Verdict</div>
+                <div className="font-bold">{verdict}</div>
+              </div>
+
+              <div className="text-right">
+                <div className="text-[10px] text-slate-500">Score</div>
+                <div className="text-xl font-bold">
+                  {safeScore !== null ? `${safeScore}%` : "--"}
                 </div>
               </div>
-              <div className="flex items-center gap-6">
-                <div className="text-center">
-                  <div className="text-[10px] text-slate-600 uppercase tracking-widest mb-1 font-bold">Safe Score</div>
-                  <div className="text-4xl md:text-5xl font-black text-white tracking-tighter italic font-mono">
-                    {safeScore !== null ? `${safeScore}%` : "--"}
-                  </div>
-                </div>
-                <button
-                  onClick={runAnalysis}
-                  disabled={!selectedImage}
-                  className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
-                    selectedImage
-                      ? "bg-blue-600 hover:bg-blue-500 text-white"
-                      : "bg-slate-800 text-slate-700 cursor-not-allowed"
-                  }`}
-                >
-                  Analyze
-                </button>
-              </div>
+
+              <button
+                onClick={runAnalysis}
+                disabled={!selectedImage}
+                className="ml-4 px-4 py-2 bg-blue-600 rounded-xl text-xs font-bold disabled:bg-slate-800"
+              >
+                Analyze
+              </button>
             </div>
+
           </div>
         </section>
       </main>
