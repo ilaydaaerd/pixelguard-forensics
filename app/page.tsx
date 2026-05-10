@@ -1,117 +1,220 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from "react";
 
 export default function ForensicDashboard() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [safeScore, setSafeScore] = useState<number | null>(null);
+  const [verdict, setVerdict] = useState("Waiting for Input");
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Upload image
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
+      const file = event.target.files[0];
+      const imageUrl = URL.createObjectURL(file);
+
+      setSelectedImage(imageUrl);
+
+      // DEMO ANALYSIS
+      const randomScore = Math.floor(Math.random() * 40) + 60;
+      setSafeScore(randomScore);
+
+      if (randomScore > 85) {
+        setVerdict("Likely Authentic");
+      } else if (randomScore > 70) {
+        setVerdict("Suspicious");
+      } else {
+        setVerdict("Likely Manipulated");
+      }
+    }
+  };
+
+  // Start webcam
+  const startCamera = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+    });
+
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+    }
+  };
+
+  // Capture photo
+  const capturePhoto = () => {
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+
+    if (canvas && video) {
+      const context = canvas.getContext("2d");
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      context?.drawImage(video, 0, 0);
+
+      const imageData = canvas.toDataURL("image/png");
+
+      setSelectedImage(imageData);
+
+      // DEMO ANALYSIS
+      const randomScore = Math.floor(Math.random() * 40) + 60;
+      setSafeScore(randomScore);
+
+      if (randomScore > 85) {
+        setVerdict("Likely Authentic");
+      } else if (randomScore > 70) {
+        setVerdict("Suspicious");
+      } else {
+        setVerdict("Likely Manipulated");
+      }
     }
   };
 
   return (
-    // h-screen yerine min-h-screen yaptık ki mobilde içerik uzarsa sayfa kesilmesin
-    <div className="min-h-screen bg-[#0B0F1A] text-slate-300 font-sans p-4 md:p-6 selection:bg-blue-500/30 flex flex-col">
-      
-      {/* HEADER: Mobilde ortaladık (text-center) */}
+    <div className="min-h-screen bg-[#0B0F1A] text-slate-300 p-4 md:p-6 flex flex-col">
+
+      {/* HEADER */}
       <header className="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-slate-800/60 pb-5 gap-4">
         <div className="text-center md:text-left">
           <h1 className="text-3xl font-black tracking-tight text-white italic">
             PIXEL<span className="text-blue-500">GUARD</span>
           </h1>
-          <p className="text-slate-500 text-[10px] md:text-xs mt-1 uppercase tracking-[0.25em] font-bold">
-            AI-Based Real-Time Image Forgery Detection
+
+          <p className="text-slate-500 text-xs mt-1 uppercase tracking-[0.25em] font-bold">
+            AI-Based Image Authenticity Detection
           </p>
         </div>
-        <div className="text-center md:text-right">
-          <div className="text-[10px] text-slate-600 uppercase tracking-widest font-bold mb-1">System Status</div>
-          <div className="text-sm text-emerald-500 font-mono flex items-center gap-3 font-bold bg-emerald-500/5 px-3 py-1 rounded-full border border-emerald-500/10">
-            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-            ACTIVE
-          </div>
+
+        <div className="text-sm text-emerald-500 font-mono flex items-center gap-3 font-bold bg-emerald-500/5 px-3 py-1 rounded-full border border-emerald-500/10">
+          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+          SYSTEM ACTIVE
         </div>
       </header>
 
-      {/* ANA PANEL: col-span yerine flex-col kullanarak mobilde alt alta gelmesini sağladık */}
-      <main className="flex flex-col lg:grid lg:grid-cols-12 gap-6 md:gap-8 flex-1 pb-4">
-        
-        {/* SOL PANEL: Upload alanı */}
-        <section className="lg:col-span-4 flex flex-col min-h-[400px]">
-          <div className="bg-[#111827] border border-slate-800/50 rounded-2xl p-6 md:p-8 shadow-2xl flex-1 flex flex-col">
-            <h2 className="text-xs font-black mb-6 text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-              <span className="w-1.5 h-4 bg-blue-600 rounded-full"></span> 
-              Content Upload
+      {/* MAIN */}
+      <main className="flex flex-col lg:grid lg:grid-cols-12 gap-6 flex-1">
+
+        {/* LEFT PANEL */}
+        <section className="lg:col-span-4 flex flex-col gap-6">
+
+          {/* Upload */}
+          <div className="bg-[#111827] border border-slate-800/50 rounded-2xl p-6 shadow-2xl">
+
+            <h2 className="text-xs font-black mb-6 text-slate-500 uppercase tracking-[0.2em]">
+              Upload Image
             </h2>
-            
-            <label htmlFor="video-upload" className="group relative border-2 border-dashed border-slate-800/80 rounded-2xl flex-1 flex flex-col items-center justify-center text-center hover:border-blue-500/40 hover:bg-blue-500/[0.02] transition-all duration-300 cursor-pointer overflow-hidden px-6 py-10">
-              <input id="video-upload" type="file" accept="image/*,video/*" onChange={handleFileChange} className="hidden" />
-              <div className="text-5xl md:text-6xl mb-6 opacity-20 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">📱</div>
-              <p className="text-sm md:text-base text-slate-400 font-medium italic leading-relaxed">
-                {selectedFile ? selectedFile.name : "Select photo or video to verify authenticity..."}
-              </p>
-              <p className="mt-4 text-[9px] md:text-[10px] text-slate-600 uppercase tracking-widest font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                Supported: JPG, PNG, MP4, MOV
+
+            <label
+              htmlFor="image-upload"
+              className="group border-2 border-dashed border-slate-800 rounded-2xl flex flex-col items-center justify-center text-center hover:border-blue-500/40 hover:bg-blue-500/[0.02] transition-all duration-300 cursor-pointer px-6 py-12"
+            >
+              <input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+
+              <div className="text-5xl mb-5 opacity-20 group-hover:opacity-100 transition">
+                🖼️
+              </div>
+
+              <p className="text-sm text-slate-400 italic">
+                Upload image for authenticity analysis
               </p>
             </label>
-            
-            <div className="mt-8 pt-6 border-t border-slate-800/50">
-              <p className="text-[10px] md:text-xs text-slate-500 leading-relaxed italic text-center px-2">
-                "PixelGuard uses advanced neural networks to identify traces of digital manipulation in real-time."
-              </p>
+          </div>
+
+          {/* Webcam */}
+          <div className="bg-[#111827] border border-slate-800/50 rounded-2xl p-6 shadow-2xl">
+
+            <h2 className="text-xs font-black mb-6 text-slate-500 uppercase tracking-[0.2em]">
+              Live Camera Capture
+            </h2>
+
+            <video
+              ref={videoRef}
+              autoPlay
+              className="w-full rounded-xl border border-slate-800 bg-black"
+            />
+
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              <button
+                onClick={startCamera}
+                className="bg-blue-600 hover:bg-blue-700 transition rounded-xl py-3 font-bold"
+              >
+                Open Camera
+              </button>
+
+              <button
+                onClick={capturePhoto}
+                className="bg-emerald-600 hover:bg-emerald-700 transition rounded-xl py-3 font-bold"
+              >
+                Capture
+              </button>
             </div>
+
+            <canvas ref={canvasRef} className="hidden" />
           </div>
         </section>
 
-        {/* SAĞ PANEL: Analiz ekranları */}
-        <section className="lg:col-span-8 flex flex-col">
-          <div className="bg-[#111827] rounded-[2rem] p-6 md:p-8 border border-slate-800/50 shadow-2xl relative flex-1 flex flex-col">
-            <h2 className="text-xl md:text-2xl font-bold text-white mb-8 tracking-tight">Security Analysis Report</h2>
-            
-            {/* Kartlar mobilde alt alta, tablette yan yana */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 flex-1">
-              <div className="group relative aspect-video bg-[#070B14] rounded-2xl flex items-center justify-center border border-slate-800/50 hover:border-blue-500/20 transition-all duration-500">
-                <div className="text-center px-6">
-                  <span className="block text-slate-300 font-bold text-xs md:text-sm uppercase tracking-[0.15em] mb-2 group-hover:text-blue-400 transition-colors">Deep Scan Analysis</span>
-                  <span className="block text-slate-600 text-[9px] md:text-[10px] italic font-medium">Tracing digital fingerprints and artifacts</span>
+        {/* RIGHT PANEL */}
+        <section className="lg:col-span-8">
+
+          <div className="bg-[#111827] rounded-[2rem] p-8 border border-slate-800/50 shadow-2xl h-full flex flex-col">
+
+            <h2 className="text-2xl font-bold text-white mb-8">
+              Security Analysis Report
+            </h2>
+
+            {/* Image Preview */}
+            <div className="flex-1 bg-[#070B14] rounded-2xl border border-slate-800 overflow-hidden flex items-center justify-center mb-8">
+
+              {selectedImage ? (
+                <img
+                  src={selectedImage}
+                  alt="preview"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <p className="text-slate-600 italic">
+                  No image selected
+                </p>
+              )}
+            </div>
+
+            {/* Result */}
+            <div className="bg-[#070B14] border border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center gap-6">
+
+              <div>
+                <div className="text-[11px] text-blue-500 uppercase font-black tracking-[0.3em] mb-2">
+                  Security Verdict
+                </div>
+
+                <div className="text-2xl font-bold text-slate-300 uppercase tracking-[0.1em] font-mono italic">
+                  {verdict}
                 </div>
               </div>
-              
-              <div className="relative aspect-video bg-black rounded-2xl flex items-center justify-center border border-slate-800 shadow-inner overflow-hidden group">
-                <div className="text-center px-6">
-                  <span className="block text-blue-500/80 font-bold text-xs md:text-sm uppercase tracking-[0.15em] mb-2 group-hover:text-blue-400 transition-colors">Fake Area Detection</span>
-                  <span className="block text-slate-700 text-[9px] md:text-[10px] italic font-medium">Mapping localized pixel inconsistencies</span>
+
+              <div className="text-center md:text-right">
+                <div className="text-[11px] text-slate-600 uppercase tracking-widest mb-1 font-bold">
+                  Safe Score
                 </div>
-                <div className="absolute top-0 left-0 w-full h-[2px] bg-blue-500/40 shadow-[0_0_20px_blue] animate-[scan_5s_linear_infinite]"></div>
+
+                <div className="text-6xl font-black text-white tracking-tighter italic font-mono">
+                  {safeScore !== null ? `${safeScore}%` : "--"}
+                </div>
               </div>
             </div>
 
-            {/* Karar Mekanizması: Mobilde dikey, tablette yatay düzen */}
-            <div className="mt-8 p-6 md:p-8 bg-[#070B14] border border-slate-800 rounded-2xl flex flex-col sm:flex-row justify-between items-center shadow-inner gap-6 text-center sm:text-left">
-              <div>
-                <div className="text-[10px] md:text-[11px] text-blue-500 uppercase font-black tracking-[0.3em] mb-2">Security Verdict</div>
-                <div className="text-xl md:text-2xl font-bold text-slate-400 uppercase tracking-[0.1em] font-mono italic">
-                  {selectedFile ? "Scanning Content..." : "Waiting for Input"}
-                </div>
-              </div>
-              <div className="sm:text-right">
-                <div className="text-[10px] md:text-[11px] text-slate-600 uppercase tracking-widest mb-1 font-bold">Safe Score</div>
-                <div className="text-4xl md:text-6xl font-black text-slate-800 tabular-nums tracking-tighter italic font-mono">
-                  00<span className="text-2xl md:text-3xl opacity-20 text-white">.0%</span>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
       </main>
-
-      <style jsx global>{`
-        @keyframes scan {
-          0% { transform: translateY(0); }
-          100% { transform: translateY(300px); }
-        }
-      `}</style>
     </div>
   );
 }
