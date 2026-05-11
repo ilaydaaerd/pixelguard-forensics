@@ -4,10 +4,9 @@ import React, { useRef, useState, useCallback, useEffect } from "react";
 
 export default function ForensicDashboard() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [safeScore, setSafeScore] = useState<number | null>(null);
-  const [verdict, setVerdict] = useState("Waiting for Input");
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [activeTab, setActiveTab] = useState<"upload" | "webcam">("upload");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -25,15 +24,13 @@ export default function ForensicDashboard() {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
       setSelectedImage(URL.createObjectURL(file));
-      setSafeScore(null);
-      setVerdict("Waiting for Input");
+      setIsAnalyzing(false);
     }
   };
 
   const clearImage = () => {
     setSelectedImage(null);
-    setSafeScore(null);
-    setVerdict("Waiting for Input");
+    setIsAnalyzing(false);
   };
 
   const startCamera = async () => {
@@ -45,8 +42,7 @@ export default function ForensicDashboard() {
       }
       setIsCameraOn(true);
       setSelectedImage(null);
-      setSafeScore(null);
-      setVerdict("Waiting for Input");
+      setIsAnalyzing(false);
     } catch {
       alert("Kameraya erişim sağlanamadı.");
     }
@@ -60,19 +56,15 @@ export default function ForensicDashboard() {
       canvas.height = video.videoHeight;
       canvas.getContext("2d")?.drawImage(video, 0, 0);
       setSelectedImage(canvas.toDataURL("image/png"));
-      setSafeScore(null);
-      setVerdict("Waiting for Input");
+      setIsAnalyzing(false);
       stopCamera();
     }
   };
 
   const runAnalysis = () => {
     if (!selectedImage) return;
-    const randomScore = Math.floor(Math.random() * 40) + 60;
-    setSafeScore(randomScore);
-    if (randomScore > 85) setVerdict("Likely Authentic");
-    else if (randomScore > 70) setVerdict("Suspicious");
-    else setVerdict("Likely Manipulated");
+    setIsAnalyzing(true);
+    // Backend bağlanınca burada API çağrısı yapılacak
   };
 
   return (
@@ -215,8 +207,8 @@ export default function ForensicDashboard() {
             </h2>
 
             {/* SCAN LINE */}
-            <div className="relative w-full h-[2px] mb-4 shrink-0 overflow-hidden bg-slate-800/50">
-              <div className="absolute left-0 w-full h-[2px] bg-blue-500/60 animate-[scandown_3s_linear_infinite]" />
+            <div className="relative w-full h-8 mb-2 shrink-0 overflow-hidden">
+              <div className="absolute left-0 w-full h-[2px] bg-blue-500/40 animate-[scanupdown_3s_ease-in-out_infinite]" />
             </div>
 
             {/* Image Preview */}
@@ -235,26 +227,26 @@ export default function ForensicDashboard() {
                   Security Verdict
                 </div>
                 <div className="text-lg md:text-xl font-bold text-slate-300 uppercase tracking-[0.1em] font-mono italic">
-                  {verdict}
+                  {isAnalyzing ? "Analyzing..." : "Waiting for Input"}
                 </div>
               </div>
               <div className="flex items-center gap-6">
                 <div className="text-center">
                   <div className="text-[10px] text-slate-600 uppercase tracking-widest mb-1 font-bold">Safe Score</div>
                   <div className="text-4xl md:text-5xl font-black text-white tracking-tighter italic font-mono">
-                    {safeScore !== null ? `${safeScore}%` : "--"}
+                    --
                   </div>
                 </div>
                 <button
                   onClick={runAnalysis}
-                  disabled={!selectedImage}
+                  disabled={!selectedImage || isAnalyzing}
                   className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
-                    selectedImage
+                    selectedImage && !isAnalyzing
                       ? "bg-blue-600 hover:bg-blue-500 text-white"
                       : "bg-slate-800 text-slate-700 cursor-not-allowed"
                   }`}
                 >
-                  Analyze
+                  {isAnalyzing ? "Analyzing..." : "Analyze"}
                 </button>
               </div>
             </div>
@@ -263,11 +255,10 @@ export default function ForensicDashboard() {
       </main>
 
       <style jsx global>{`
-        @keyframes scandown {
-          0%   { transform: translateY(-100px); opacity: 0; }
-          10%  { opacity: 1; }
-          90%  { opacity: 1; }
-          100% { transform: translateY(600px); opacity: 0; }
+        @keyframes scanupdown {
+          0%   { transform: translateY(0px); }
+          50%  { transform: translateY(28px); }
+          100% { transform: translateY(0px); }
         }
       `}</style>
     </div>
