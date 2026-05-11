@@ -215,8 +215,8 @@ export default function ForensicDashboard() {
             </h2>
 
             {/* SCAN LINE */}
-            <div className="relative h-[2px] w-full mb-4 shrink-0 overflow-hidden rounded-full bg-slate-800/50">
-              <div className="absolute top-0 left-0 h-full w-1/3 bg-blue-500/40 animate-[scan_2s_ease-in-out_infinite]" />
+            <div className="relative w-full h-[2px] mb-4 shrink-0 overflow-hidden bg-slate-800/50">
+              <div className="absolute left-0 w-full h-[2px] bg-blue-500/60 animate-[scandown_3s_linear_infinite]" />
             </div>
 
             {/* Image Preview */}
@@ -263,9 +263,11 @@ export default function ForensicDashboard() {
       </main>
 
       <style jsx global>{`
-        @keyframes scan {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(400%); }
+        @keyframes scandown {
+          0%   { transform: translateY(-100px); opacity: 0; }
+          10%  { opacity: 1; }
+          90%  { opacity: 1; }
+          100% { transform: translateY(600px); opacity: 0; }
         }
       `}</style>
     </div>
