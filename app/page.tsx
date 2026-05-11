@@ -206,9 +206,9 @@ export default function ForensicDashboard() {
               Security Analysis Report
             </h2>
 
-            {/* Image Preview — scan line BURAYA taşındı */}
+            {/* Image Preview */}
             <div className="relative flex-1 bg-[#070B14] rounded-2xl border border-slate-800 overflow-hidden flex items-center justify-center mb-4 min-h-0">
-              <div className="absolute left-0 w-full h-[2px] bg-blue-500/40 z-10 animate-[scanupdown_3s_ease-in-out_infinite]" />
+              <div className="absolute left-0 w-full h-[2px] bg-blue-500/40 z-10 animate-[scanupdown_8s_ease-in-out_infinite]" />
               {selectedImage ? (
                 <img src={selectedImage} alt="preview" className="w-full h-full object-contain" />
               ) : (
