@@ -206,13 +206,9 @@ export default function ForensicDashboard() {
               Security Analysis Report
             </h2>
 
-            {/* SCAN LINE */}
-            <div className="relative w-full h-8 mb-2 shrink-0 overflow-hidden">
-              <div className="absolute left-0 w-full h-[2px] bg-blue-500/40 animate-[scanupdown_3s_ease-in-out_infinite]" />
-            </div>
-
-            {/* Image Preview */}
-            <div className="flex-1 bg-[#070B14] rounded-2xl border border-slate-800 overflow-hidden flex items-center justify-center mb-4 min-h-0">
+            {/* Image Preview — scan line BURAYA taşındı */}
+            <div className="relative flex-1 bg-[#070B14] rounded-2xl border border-slate-800 overflow-hidden flex items-center justify-center mb-4 min-h-0">
+              <div className="absolute left-0 w-full h-[2px] bg-blue-500/40 z-10 animate-[scanupdown_3s_ease-in-out_infinite]" />
               {selectedImage ? (
                 <img src={selectedImage} alt="preview" className="w-full h-full object-contain" />
               ) : (
@@ -256,9 +252,9 @@ export default function ForensicDashboard() {
 
       <style jsx global>{`
         @keyframes scanupdown {
-          0%   { transform: translateY(0px); }
-          50%  { transform: translateY(28px); }
-          100% { transform: translateY(0px); }
+          0%   { top: 0; }
+          50%  { top: calc(100% - 2px); }
+          100% { top: 0; }
         }
       `}</style>
     </div>
